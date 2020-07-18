@@ -1,3 +1,4 @@
+#
 # The MySQL database server configuration file.
 #
 # You can copy this to one of:
@@ -43,12 +44,12 @@ skip-external-locking
 #
 # Instead of skip-networking the default is now to listen only on
 # localhost which is more compatible and is not less secure.
-#bind-address		= 127.0.0.1
+#bind-address		= localhost
 #
 # * Fine Tuning
 #
 key_buffer		= 16M
-max_allowed_packet	= 33M
+max_allowed_packet	= 16M
 thread_stack		= 192K
 thread_cache_size       = 8
 # This replaces the startup script and checks MyISAM tables if needed
@@ -123,3 +124,4 @@ key_buffer		= 16M
 # * IMPORTANT: Additional settings that can override those from this file!
 #   The files must end with '.cnf', otherwise they'll be ignored.
 #
+

@@ -1,0 +1,43 @@
+Порядок развертывания/установки группы серверов на базе Ubuntu Server 14.04.6 i386:
+
+1) После установки ОС, необходимо обновить пакеты
+#sudo apt-get update
+#sudo apt-get upgrade 
+Если в процессе установки ОС был указан флаг о 'openSSH server', то можно произвести подключение с рабочей машины
+
+2) Далее необходимо установить СУБД, MySQL и задать пароль супер-пользователя СУБД
+#sudo apt-get install mysql-server
+Запуск скрипта безопастности
+#sudo mysql_secure_installation
+Выполняется перезагрузка и проверка сервера
+#sudo service mysql restart
+#sudo service mysql status
+
+3) Необходимо отредактироввать файл конфигураций /etc/mysql/my.cnf
+Конфигурации находятся в файле MySqlConfigFile.txt который находится в репозитории проекта
+
+4) Автаритизироваться как супер-пользователь командой
+#mysql -u root -p 
+
+5) Создается внутрянняя база данных homeEvilCorp
+#create database homeEvilCorp;
+Создается таблица сотрудников EvilCorp
+#use homeEvilCorp
+#create table usersEvilCorp(id int primary key AUTO_INCREMENT, ip varchar(16), mac varchar(18), fullName varchar(50), post varchar(50), email varchar(50), pass varchar(50), unique(mac, email));
+
+6) Создается администратор базы данных usersEvilCorp
+#create user 'devArhNet'@'localhost' identified by 'ebuciyShmel';
+Предоставление пользователю devHome всех прав работы с базой данных homeEvilCorp
+#grant all on homeEvilCorp.* to 'devArhNet'@'localhost' identified by 'ebuciyShmel';
+Обновление привилегий базы данных homeEvilCorp
+#flush privileges;
+
+7)Создается каталог в домашней директории сервера для исполняемых файлов
+#/home/texet/EvilCorp
+Так-же для обеспечения безопастности на данный каталог устанавливаются права, что только владелец может читать и записывать в этом каталоге
+#chmod 700 /home/texet/EvilCorp
+
+8) Для дальнейшей разработки устанавливается pip для python3
+#sudo apt-get install python3-pip
+Так-же модуль для работы с СУБД MySQL, pymysql
+#sudo pip3 install pymysql
