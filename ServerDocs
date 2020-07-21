@@ -15,29 +15,28 @@
 
 3) Необходимо отредактироввать файл конфигураций /etc/mysql/my.cnf
 Конфигурации находятся в файле MySqlConfigFile.txt который находится в репозитории проекта
+Необходимо обновить правила для iptables и UFW командой
+#sudo iptables -A INPUT -s 192.168.0.103 -p tcp --destination-port 3306 -j ACCEPT
+#sudo ufw allow from 192.168.0.103 to any port 3306
+Так-как открывать доступ для каждого ip-адреса не безопасно, то для каждого хоста который будет работать с СУБД MySql необходимо устанавливать правила отдельно
 
 4) Автаритизироваться как супер-пользователь командой
 #mysql -u root -p 
 
-5) Создается внутрянняя база данных homeEvilCorp
+5) Создается база данных homeEvilCorp
 #create database homeEvilCorp;
 Создается таблица сотрудников EvilCorp
 #use homeEvilCorp
-#create table usersEvilCorp(id int primary key AUTO_INCREMENT, ip varchar(16), mac varchar(18), fullName varchar(50), post varchar(50), email varchar(50), pass varchar(50), unique(mac, email));
+#create table users(id int primary key AUTO_INCREMENT, ip varchar(16), mac varchar(18), fullName varchar(50), post varchar(50), email varchar(50), pass varchar(50), unique(mac, email));
 
-6) Создается администратор базы данных usersEvilCorp
-#create user 'devArhNet'@'localhost' identified by 'ebuciyShmel';
-Предоставление пользователю devHome всех прав работы с базой данных homeEvilCorp
-#grant all on homeEvilCorp.* to 'devArhNet'@'localhost' identified by 'ebuciyShmel';
+Создается таблица разработчиков EvilCorp
+#create table developer(id int primary key AUTO_INCREMENT, ip varchar(16), login varchar(50), pass varchar(50), post varchar(50), access varchar(50), unique(login));
+Администратором таблицы  developer остается root, а users переходит под управление workArhNet@192.168.0.103 и homeArhNet@192.168.1.
+
+
+6) Создается администратор таблицы users
+#create user 'workArhNet'@'192.168.0.103' identified by 'ebuciyShmel';
+Предоставление пользователю devHome всех прав работы с таблицей users
+#grant all on homeEvilCorp.users to 'workArhNet'@'192.168.0.103' identified by 'ebuciyShmel';
 Обновление привилегий базы данных homeEvilCorp
 #flush privileges;
-
-7)Создается каталог в домашней директории сервера для исполняемых файлов
-#/home/texet/EvilCorp
-Так-же для обеспечения безопастности на данный каталог устанавливаются права, что только владелец может читать и записывать в этом каталоге
-#chmod 700 /home/texet/EvilCorp
-
-8) Для дальнейшей разработки устанавливается pip для python3
-#sudo apt-get install python3-pip
-Так-же модуль для работы с СУБД MySQL, pymysql
-#sudo pip3 install pymysql
