@@ -8,6 +8,7 @@ def getArgument():
 	options.add_option('-H', '--host', dest='host', help='HOST(IP) удаленной базы данных')
 	options.add_option('-u', '--user', dest='user', help='LOGIN администратора')
 	options.add_option('-d', '--database', dest='database', help='Название базы данных')
+	options.add_option('-t', '--table', dest='table', help='название таблицы')
 	(option, argument) = options.parse_args()
 	if not option.host:
 		options.error('[!] Укажите адрес удаленного DB сервера')
@@ -15,6 +16,8 @@ def getArgument():
 		options.error('[!] Укажите логин пользователя удаленного DB сервера')
 	if not option.database:
 		options.error('[!] Укажите название базы данных к которой вы хотите подключится')
+	if not option.table:
+		options.error('[!] Укажите название таблицы')
 	return option
 
 def createConnect(option):
@@ -52,7 +55,7 @@ def main(connection):
 		else:
 			print('[!] Не корректный флаг')
 
-def newRecording(connection):
+def newUser():
 	cheackWhile = True
 	while cheackWhile:
 		ipInput = input('ip: ')
@@ -61,20 +64,27 @@ def newRecording(connection):
 		postInput = input('Должность: ')
 		mailInput = input('e-mail: ')
 		passInput = input('Пароль: ')
-		cursor = connection.cursor()   
-		sql =  'Insert into users (ip, mac, fullName, position, email, password) values (%s, %s, %s, %s, %s, %s)'
-		cursor.execute(sql, (ipInput, macInput, nameInput, postInput, mailInput, passInput))    
-		connection.commit() 
+		dataUser = [ipInput, macInput, postInput, mailInput, passInput]
+		print(dataUser)
 		enterChoise = input('[?] Продолжить заполнение таблицы (y/n): ')
 		if enterChoise != 'y':
 			cheackWhile = False
-	connection.close()
+	
+
+def newRecording(connection, option):
+	cursor = connection.cursor()   
+	sql =  'Insert into users (ip, mac, fullName, position, email, password) values (%s, %s, %s, %s, %s, %s)'
+	cursor.execute(sql, (ipInput, macInput, nameInput, postInput, mailInput, passInput))    
+	connection.commit() 
+	connection.close()	
 
 def deletRecording(connection):
 	pass
 	#удаление записи\пользователя
 
 
-option = getArgument()
-connection = createConnect(option)
-main(connection)
+#option = getArgument()
+#connection = createConnect(option)
+#main(connection)
+
+newUser()
