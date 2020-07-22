@@ -17,11 +17,7 @@
 Конфигурации находятся в файле MySqlConfigFile.txt который находится в репозитории проекта
 Необходимо обновить правила для iptables и UFW командой
 #sudo iptables -A INPUT -s 192.168.0.103 -p tcp --destination-port 3306 -j ACCEPT
-#sudo iptables -A INPUT -s 192.168.1.65 -p tcp --destination-port 3306 -j ACCEPT
-
 #sudo ufw allow from 192.168.0.103 to any port 3306
-#sudo ufw allow from 192.168.1.65 to any port 3306
-
 Так-как открывать доступ для каждого ip-адреса не безопасно, то для каждого хоста который будет работать с СУБД MySql необходимо устанавливать правила отдельно
 
 4) Автаритизироваться как супер-пользователь командой
@@ -40,10 +36,7 @@
 
 6) Создается администратор таблицы users
 #create user 'workArhNet'@'192.168.0.103' identified by 'ebuciyShmel';
-А так-же второй пользователь для работы из дома
-#create user 'homeArhNet'@'192.168.1.65' identified by 'ebuciyShmel';
-Предоставление пользователю workArhNet и homeArhNet всех прав работы с базой homeEvilCorp
-#grant all on homeEvilCorp.* to 'workArhNet'@'192.168.0.103' identified by 'ebuciyShmel';
-#grant all on homeEvilCorp.* to 'homeArhNet'@'192.168.1.65' identified by 'ebuciyShmel';
+Предоставление пользователю devHome всех прав работы с таблицей users
+#grant all on homeEvilCorp.users to 'workArhNet'@'192.168.0.103' identified by 'ebuciyShmel';
 Обновление привилегий базы данных homeEvilCorp
 #flush privileges;
