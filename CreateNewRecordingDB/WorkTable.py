@@ -22,10 +22,26 @@ def choiceOperation():
 	connect = choiceTable()
 	try:
 		nameTable = input('[*] Укажите имя таблицы: ')
-		print('1)Добавить запись\n2)Удалить запись\n3)Редатировать запись\n4)Прочитать таблицу')
+		try:
+			cursor = connect.cursor()
+			sql = 'show columns from %s' % nameTable
+			cursor.execute(sql)
+			column = cursor.fetchall()
+			for item in column:
+				print('{:<12} : {:<12}'.format(item[0], item[1]))
+		except pymysql.err.ProgrammingError as error:
+			if '1146' in str(error):
+				print('[!] Таблицы ' + nameTable + ' не существует')
+				connect.close()
+				choiceOperation()
+		except KeyboardInterrupt:
+			print('\n[.] Выход из программы')
+			connect.close()
+			sys.exit()
+		print('\n1)Добавить запись\n2)Удалить запись\n3)Редатировать запись\n4)Прочитать таблицу')
 		choiceInput = int(input('[*] Укажите Операцию (цифрой): '))
 	except KeyboardInterrupt:
-		print('[*] Выход из программы')
+		print('\n[.] Выход из программы')
 		connect.close()
 		sys.exit()
 	except ValueError:
@@ -33,25 +49,8 @@ def choiceOperation():
 		connect.close()
 		choiceOperation()
 
-	try:
-		cursor = connect.cursor()
-		sql = 'show columns from %s' % nameTable
-		cursor.execute(sql)
-		column = cursor.fetchall()
-		for item in column:
-			print('{:<12} : {:<12}'.format(item[0], item[1]))
-	except pymysql.err.ProgrammingError as error:
-		if '1146' in str(error):
-			print('[!] Таблицы ' + nameTable + ' не существует')
-			connect.close()
-			choiceOperation()
-	except KeyboardInterrupt:
-		print('[*] Выход из программы')
-		connect.close()
-		sys.exit()
-
 	#Создание новой записи
-	if choiceInput == '1':
+	if choiceInput == 1:
 		whileCheac = True
 		while whileCheac:
 			try:
@@ -64,7 +63,7 @@ def choiceOperation():
 					dataKey.append(item[0])
 					dataVel.append(item[1])
 			except KeyboardInterrupt:
-				print('[!] Выход из программы')
+				print('\n[.] Выход из программы')
 				connect.close()
 				sys.exit()
 
@@ -85,19 +84,90 @@ def choiceOperation():
 			else:
 				print('[+] Запись данных успешно выполнена')
 
-			userInput = input('Продолжить? (y/n)')
-			if userInput == 'n':
-				whileCheac = False
+			try:
+				userInput = input('Продолжить? (y/n)').lower()
+				if userInput == 'n':
+					whileCheac = False
+					connect.close()
+					choiceOperation()
+				else:
+					whileCheac = True
+			except KeyboardInterrupt:
+				print('\n[.] Выход из программы')
 				connect.close()
 				sys.exit()
 
-	#Удаление записи
-	elif choiceInput == '2':
-		pass
+	#Удаление записи ДОДЕЛАТЬ
+	elif choiceInput == 2:
+		whileCheac = True
+		while whileCheac:
+			idInput = input('[*] Укажите ID записи которую нужно удалить: ')
+			try:
+				sqlRequst = 'delete from ' + nameTable + ' where mac=' + idInput
+				cursor.execute(sqlRequst)
+				connect.commit()
+			except pymysql.err.ProgrammingError as error:
+				if '1064' in str(error):
+					print('[!] Ошибка в синтаксисе, неверно указанно значение')
+
+
+
+			try:
+				userInput = input('Продолжить? (y/n)').lower()
+				if userInput == 'n':
+					whileCheac = False
+					connect.close()
+					choiceOperation()
+				else:
+					whileCheac = True
+			except KeyboardInterrupt:
+				print('\n[.] Выход из программы')
+				connect.close()
+				sys.exit()
+	#
 	elif choiceInput == '3':
 		pass
-	elif choiceInput == '4':
-		pass
+	#чтение данных
+	elif choiceInput == 4:
+		whileCheac = True
+		while whileCheac:
+			sqlRequst = 'select id, ip, fullName, position, email from ' + nameTable
+			cursor.execute(sqlRequst)
+			resalt = cursor.fetchall()
+			for item in resalt:
+				print(str(item))
+			try:
+				userInput = input('[*] Найти определенного пользователя по ID? (y/n): ')
+				if userInput == 'n':
+					connect.close()
+					choiceOperation()
+			except KeyboardInterrupt:
+				print('\n[.] Выход из программы')
+				connect.close()
+				sys.exit()
+			else:
+				try:
+					search = input('Укажите ID записи: ')
+					sqlRequst = 'select id, ip, fullName, position, email from ' + nameTable + ' where id=' + search
+					cursor.execute(sqlRequst)
+					resalt = cursor.fetchall()
+					if len(resalt) == 0:
+						print('[!] ID ' + search + ' не существует')
+						userInput = input('Продолжить? (y/n): ')
+						if userInput == 'n':
+							connect.close()
+							sys.exit()
+					else:
+						print('[+] Запись ' + str(resalt))
+						connect.close()
+						choiceOperation()
+				except KeyboardInterrupt:
+					print('\n[.] Выход из программы')
+					connect.close()
+					sys.exit()
+
+
+
 	else:
 		print('[!] Неверная операция')
 
