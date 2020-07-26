@@ -2,68 +2,104 @@
 # -*- coding: utf-8 -*-
 import CreateConnect
 import pymysql
+import sys
 
 def choiceTable():
 	option = CreateConnect.getArgument()
 	connect = CreateConnect.createConnect(option)
-	cursor = connect.cursor()
-	sqlReqest = 'show tables'
-	cursor.execute(sqlReqest)
-	tabList = cursor.fetchall()
-	for item in tabList:
-		print(item)
-	
-	
-	return connect
+	try:
+		cursor = connect.cursor()
+		sqlReqest = 'show tables'
+		cursor.execute(sqlReqest)
+		tabList = cursor.fetchall()
+		for item in tabList:
+			print(item)
+		return connect
+	except AttributeError:
+		sys.exit()
 
 def choiceOperation():
 	connect = choiceTable()
-	nameTable = input('[*] Укажите имя таблицы: ')
-	print('1)Добавить запись\n2)Удалить запись\n3)Редатировать запись\n4)Прочитать таблицу')
-	choiceInput = input('[*] Укажите Операцию (цифрой): ')
+	try:
+		nameTable = input('[*] Укажите имя таблицы: ')
+		print('1)Добавить запись\n2)Удалить запись\n3)Редатировать запись\n4)Прочитать таблицу')
+		choiceInput = int(input('[*] Укажите Операцию (цифрой): '))
+	except KeyboardInterrupt:
+		print('[*] Выход из программы')
+		connect.close()
+		sys.exit()
+	except ValueError:
+		print("[!] Укажите число")
+		connect.close()
+		choiceOperation()
+
 	try:
 		cursor = connect.cursor()
 		sql = 'show columns from %s' % nameTable
 		cursor.execute(sql)
-		result = cursor.fetchall()
-		#парсим нахуй вывод шоб получить имена таблиц и их кол-во
-		nameColumn = []
-		for item in result:
-			nameColumn.append(item[0])
-		print(nameColumn)
-
+		column = cursor.fetchall()
+		for item in column:
+			print('{:<12} : {:<12}'.format(item[0], item[1]))
 	except pymysql.err.ProgrammingError as error:
 		if '1146' in str(error):
 			print('[!] Таблицы ' + nameTable + ' не существует')
 			connect.close()
 			choiceOperation()
-	
-	dataInput = input('[*] Укажите данные формата id:1 name:Nick ')
-	data = dataInput.split(' ')
-	dataKey = []
-	dataVel = []
-	for item in data:
-		item = item.split(':')
-		dataKey.append(item[0])
-		dataVel.append(item[1])
+	except KeyboardInterrupt:
+		print('[*] Выход из программы')
+		connect.close()
+		sys.exit()
 
+	#Создание новой записи
 	if choiceInput == '1':
-		try:
-			sqlReqest = 'insert into ' + nameTable + str(dataKey) + ' values ' + str(dataVel)
-		#	sqlReqest = 'Insert into %s' %nameTable '(%s)' %nameColumn ' values (%s, %s, %s, %s, %s, %s)'
-			cursor.execute(sqlReqest)    
-			connection.commit()
-		except pymysql.err.ProgrammingError as error:
-			if '1064' in str(error):
-				print('[!] Ошибка в синтаксисе, неверно указан ключ')
+		whileCheac = True
+		while whileCheac:
+			try:
+				dataInput = input('[*] Укажите данные формата id:1 name:"Nick" ')
+				data = dataInput.split(' ')
+				dataKey = []
+				dataVel = []
+				for item in data:
+					item = item.split(':')
+					dataKey.append(item[0])
+					dataVel.append(item[1])
+			except KeyboardInterrupt:
+				print('[!] Выход из программы')
 				connect.close()
-				choiceOperation()
-	elif choiseInput == '2':
+				sys.exit()
+
+			try:
+				sqlReqest = 'insert into ' + nameTable + '(' + ", ".join(dataKey) + ') values(' + ", ".join(
+					dataVel) + ')'
+				cursor.execute(sqlReqest)
+				connect.commit()
+			except pymysql.err.ProgrammingError as error:
+				if '1064' in str(error):
+					print('[!] Ошибка в синтаксисе, неверно указанно значение')
+			except pymysql.err.IntegrityError as error:
+				if '1062' in str(error):
+					print('[!] Ошибка ввода данных, повторяется запись')
+			except pymysql.err.OperationalError as error:
+				if '1054' in str(error):
+					print("[!] не верно указано имя столбца")
+			else:
+				print('[+] Запись данных успешно выполнена')
+
+			userInput = input('Продолжить? (y/n)')
+			if userInput == 'n':
+				whileCheac = False
+				connect.close()
+				sys.exit()
+
+	#Удаление записи
+	elif choiceInput == '2':
 		pass
-	elif choiseInput == '3':
+	elif choiceInput == '3':
 		pass
-	elif choiseInput == '4':
+	elif choiceInput == '4':
 		pass
-	 
+	else:
+		print('[!] Неверная операция')
+
 
 choiceOperation()

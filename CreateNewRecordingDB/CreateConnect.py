@@ -24,14 +24,14 @@ def createConnect(option):
 	dbName = option.database
 	passName = 'ebuciyShmel'#getpass.getpass('Введите пароль пользователя базы данных: ')
 	try:
-		connection = pymysql.connect(host=hostName,
+		connect = pymysql.connect(host=hostName,
 			user=userName,
 			password=passName,
 			db=dbName,
 			charset='utf8',
 			port=3306)
 		print('[+] Соединение с ' + dbName + ' установленно')
-		return connection
+		return connect
 	except pymysql.err.OperationalError as error:
 		if '2003' in str(error):
 			print('[!] Соединение с сервером отсутствует')

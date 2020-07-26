@@ -1,5 +1,5 @@
 a = ['1', '2', '3']
-b = ['a', 's', 'd']
 
-f = 'bla' + str(a)
-print(f)
+print(', '.join(a))
+
+#pymysql.err.IntegrityError: (1062, "Duplicate entry '5' for key 'PRIMARY'") отработать исключение
