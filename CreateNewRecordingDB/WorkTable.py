@@ -137,39 +137,46 @@ def choiceOperation():
 			for item in resalt:
 				print(str(item))
 			try:
-				userInput = input('[*] Найти определенного пользователя по ID? (y/n): ')
+				userInput = input('[*] Найти определенного пользователя по ID? (y/n): ').lower()
 				if userInput == 'n':
 					connect.close()
 					choiceOperation()
+				elif userInput == 'y':
+					try:
+						search = input('Укажите ID записи: ')
+						sqlRequst = 'select id, ip, fullName, position, email from ' + nameTable + ' where id=' + search
+						cursor.execute(sqlRequst)
+						resalt = cursor.fetchall()
+						if len(resalt) == 0:
+							print('[!] ID ' + search + ' не существует')
+							userInput = input('Продолжить? (y/n): ')
+							if userInput == 'n':
+								connect.close()
+								sys.exit()
+						else:
+							print('[+] Запись ' + str(resalt))
+							connect.close()
+							choiceOperation()
+					except pymysql.err.InternalError as error:
+						if '1054' in str(error):
+							print('[!] Ошибка ввода ID')
+					except KeyboardInterrupt:
+						print('\n[.] Выход из программы')
+						connect.close()
+						sys.exit()
+
 			except KeyboardInterrupt:
 				print('\n[.] Выход из программы')
 				connect.close()
 				sys.exit()
 			else:
-				try:
-					search = input('Укажите ID записи: ')
-					sqlRequst = 'select id, ip, fullName, position, email from ' + nameTable + ' where id=' + search
-					cursor.execute(sqlRequst)
-					resalt = cursor.fetchall()
-					if len(resalt) == 0:
-						print('[!] ID ' + search + ' не существует')
-						userInput = input('Продолжить? (y/n): ')
-						if userInput == 'n':
-							connect.close()
-							sys.exit()
-					else:
-						print('[+] Запись ' + str(resalt))
-						connect.close()
-						choiceOperation()
-				except KeyboardInterrupt:
-					print('\n[.] Выход из программы')
-					connect.close()
-					sys.exit()
-
+				print('[!] Неверная операция')
 
 
 	else:
 		print('[!] Неверная операция')
+		connect.close()
+		choiceOperation()
 
 
 choiceOperation()
